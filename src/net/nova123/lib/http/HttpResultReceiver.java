@@ -2,11 +2,18 @@ package net.nova123.lib.http;
 
 public interface HttpResultReceiver {
 
-	public void onHttpFailed(int requestCode, int code);
+	public void onHttpFailure(int requestCode, int code, String str);
 
-	public void onFailedMessageCode(int requestCode, int code, String msg);
+	public void onHttpSuccess(int requestCode, Object t);
 
-	public void onStringMessageReceive(int requestCode, String str);
+	/**
+	 * you can parse the msg to a object here
+	 * 
+	 * @param <T>
+	 * 
+	 * @param requestCode
+	 * @param str
+	 */
+	public Object onStringMessageReceive(int requestCode, String str);
 
-	public <T> void onObjectMessageReceive(int requestCode, T t);
 }

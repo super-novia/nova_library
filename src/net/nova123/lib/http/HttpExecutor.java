@@ -8,8 +8,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import android.os.Handler;
 
 public class HttpExecutor {
 
@@ -28,6 +28,7 @@ public class HttpExecutor {
 			HttpURLConnection connection = (HttpURLConnection) url
 					.openConnection();
 			connection.setRequestProperty("content-type", "application/json");
+			connection.setRequestProperty("User-Agent", "");
 			connection.setConnectTimeout(mConfig.getTimeOut());
 			connection.setDoInput(true);
 			connection.connect();
@@ -69,6 +70,7 @@ public class HttpExecutor {
 					.openConnection();
 			connection.setConnectTimeout(mConfig.getTimeOut());
 			connection.setRequestProperty("content-type", "application/json");
+			connection.setRequestProperty("User-Agent", "");
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
 

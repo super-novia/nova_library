@@ -3,7 +3,7 @@ package net.nova123.lib.http;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.alibaba.fastjson.JSON;
+import android.os.Handler;
 
 public class HttpManager {
 
@@ -12,6 +12,8 @@ public class HttpManager {
 	private static HttpManager httpManager = new HttpManager();
 
 	private HttpExecutor httpExecutor = new HttpExecutor();
+
+	private Handler mHandler = new Handler();
 
 	private HttpManager() {
 	}
@@ -30,41 +32,31 @@ public class HttpManager {
 
 			@Override
 			public void run() {
-				HttpRequestResult result = httpExecutor.executeHttpGet(url);
+				final HttpRequestResult result = httpExecutor
+						.executeHttpGet(url);
 				if (result.getCode() == HttpRequestResult.HTTP_SUCCESS) {
-					receiver.onStringMessageReceive(requestCode,
-							result.getResponse());
-					System.out.println("exe Get");
+					final Object obj = receiver.onStringMessageReceive(
+							requestCode, result.getResponse());
+					mHandler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							receiver.onHttpSuccess(requestCode, obj);
+						}
+					});
 				} else {
-					receiver.onHttpFailed(requestCode, result.getCode());
+					mHandler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							receiver.onHttpFailure(requestCode,
+									result.getCode(),
+									"网络请求出错,错误码:" + result.getCode());
+						}
+					});
 				}
 			}
 		});
-	}
-
-	public <T> void exeGetAndParseJson(final int requestCode, final String url,
-			final Class<T> cls, final HttpResultReceiver receiver) {
-		executor.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				HttpRequestResult result = httpExecutor.executeHttpGet(url);
-				if (result.getCode() == HttpRequestResult.HTTP_SUCCESS) {
-					String str = result.getResponse();
-					T t = JSON.parseObject(str, cls);
-					receiver.onObjectMessageReceive(requestCode, t);
-				} else {
-					receiver.onHttpFailed(requestCode, result.getCode());
-				}
-			}
-		});
-	}
-
-	/**
-	 * 这个方法还未实现！请不要使用
-	 */
-	@Deprecated
-	public void exeGetAndParseXml() {
 	}
 
 	public void exePost(final int requestCode, final String url,
@@ -73,27 +65,31 @@ public class HttpManager {
 
 			@Override
 			public void run() {
-				HttpRequestResult result = httpExecutor.executeHttpPost(url,
-						content);
+				final HttpRequestResult result = httpExecutor.executeHttpPost(
+						url, content);
 				if (result.getCode() == HttpRequestResult.HTTP_SUCCESS) {
-					receiver.onStringMessageReceive(requestCode,
-							result.getResponse());
-					System.out.println("exe exePost");
+					final Object obj = receiver.onStringMessageReceive(
+							requestCode, result.getResponse());
+					mHandler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							receiver.onHttpSuccess(requestCode, obj);
+						}
+					});
 				} else {
-					receiver.onHttpFailed(requestCode, result.getCode());
+					mHandler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							receiver.onHttpFailure(requestCode,
+									result.getCode(),
+									"网络请求出错,错误码:" + result.getCode());
+						}
+					});
 				}
 			}
 		});
-	}
-
-	public void exePostAndParseJson() {
-	}
-
-	/**
-	 * 这个方法还未实现！请不要使用
-	 */
-	@Deprecated
-	public void exePostAndParseXml() {
 	}
 
 }
