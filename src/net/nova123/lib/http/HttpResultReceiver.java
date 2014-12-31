@@ -9,8 +9,6 @@ public interface HttpResultReceiver {
 	/**
 	 * you can parse the msg to a object here
 	 * 
-	 * @param <T>
-	 * 
 	 * @param requestCode
 	 * @param str
 	 */
