@@ -8,8 +8,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
-import android.os.Handler;
+import android.text.TextUtils;
 
 public class HttpExecutor {
 
@@ -17,6 +19,17 @@ public class HttpExecutor {
 
 	public void setConfig(HttpConfig config) {
 		mConfig = config;
+	}
+
+	private String getCharset(String connect) {
+		String charset = null;
+		for (String param : connect.replace(" ", "").split(";")) {
+			if (param.startsWith("charset=")) {
+				charset = param.split("=", 2)[1];
+				break;
+			}
+		}
+		return charset;
 	}
 
 	HttpRequestResult executeHttpGet(String urls) {
@@ -35,8 +48,14 @@ public class HttpExecutor {
 
 			result.setCode(connection.getResponseCode());
 			if (connection.getResponseCode() == 200) {
+				// 获取响应消息的字符编码
+				String contentType = connection.getHeaderField("Content-Type");
+				String charset = getCharset(contentType);
+				if (TextUtils.isEmpty(charset)) {
+					charset = mConfig.getCharSet();
+				}
 				reader = new BufferedReader(new InputStreamReader(
-						connection.getInputStream(), mConfig.getCharSet()));
+						connection.getInputStream(), charset));
 				String str;
 				while ((str = reader.readLine()) != null) {
 					builder.append(str);
@@ -82,10 +101,14 @@ public class HttpExecutor {
 			connection.connect();
 			result.setCode(connection.getResponseCode());
 			if (connection.getResponseCode() == 200) {
-				// write the content to server
-
+				// 获取响应消息的字符编码
+				String contentType = connection.getHeaderField("Content-Type");
+				String charset = getCharset(contentType);
+				if (TextUtils.isEmpty(charset)) {
+					charset = mConfig.getCharSet();
+				}
 				reader = new BufferedReader(new InputStreamReader(
-						connection.getInputStream(), mConfig.getCharSet()));
+						connection.getInputStream(), charset));
 				String str;
 				while ((str = reader.readLine()) != null) {
 					builder.append(str);
